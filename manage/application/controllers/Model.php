@@ -42,7 +42,7 @@ class Model extends Admin_Controller
     function get_series_by_brand($brand_id)
     {
         $data = $this->db->get_where('series', array('brand_id' => $brand_id))->result_array();
-        echo "<option value=''>Select Series</option>";
+        echo "<option value='' disabled=''>Select Series</option>";
 
         foreach ($data as $key => $value) {
             echo "<option value='".$value['id']."'>".$value['name']."</option>";
@@ -90,8 +90,9 @@ class Model extends Admin_Controller
                 $nestedData['series_name'] = $post->series_name;
                 $nestedData['date_created'] = date('j M Y', strtotime($post->date_created));
                 $nestedData['status'] = ($post->status == 1) ? "<button class='btn btn-success btn-xs btn-status' name='status-active'  code='".$post->id."'>Active</button>" : "<button class='btn btn-danger btn-xs btn-status' name='status-suspend' code='".$post->id."'>Suspened</button>";
-                $nestedData['actions'] = "<button class='btn btn-warning btn-xs'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs'>Delete</button>";
- $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit'  code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
+
+                $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit' seriescode='".$post->seriesID."' brandcode='".$post->brandID."' code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
+
                 $data[] = $nestedData;
             }
         }
@@ -121,6 +122,16 @@ class Model extends Admin_Controller
       // ($status==1) ? 'ACTIVE':
        $this->Model_model->update_model($id,[
                 'status' => $status
+            ]);
+      // echo $status;exit;  
+    } 
+         function update_model($id)
+    {
+      $status=$this->input->post('status');
+      // ($status==1) ? 'ACTIVE':
+       $this->Model_model->update_model($id,[
+                'series_id' => $this->input->post('series_id'),
+                    'name' => $this->input->post('name'),
             ]);
       // echo $status;exit;  
     }   

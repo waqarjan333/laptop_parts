@@ -82,6 +82,7 @@ class Part extends Admin_Controller
             6 => 'seller',
             7 => 'qty',
             8 => 'unit_price',
+            8 => 'status',
             9 => 'description',
             10 => 'id',
         );
@@ -119,7 +120,8 @@ class Part extends Admin_Controller
                 $nestedData['qty'] = $post->qty;   
                 $nestedData['unit_price'] = $post->unit_price;  
                 $nestedData['description'] = $post->description;  
-                $nestedData['actions'] = "<button class='btn btn-warning btn-xs'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs'>Delete</button>";
+                $nestedData['status'] = ($post->status == 1) ? "<button class='btn btn-success btn-xs btn-status' name='status-active'  code='".$post->id."'>Active</button>" : "<button class='btn btn-danger btn-xs btn-status' name='status-suspend' code='".$post->id."'>Suspened</button>";   
+                 $nestedData['actions'] = "<button class='btn btn-warning btn-xs'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
 
                 $data[] = $nestedData;
             }
@@ -134,6 +136,20 @@ class Part extends Admin_Controller
 
         echo json_encode($json_data);
     }
+
+
+    /*
+     * Update Status series
+     */
+      function updateStatus($id)
+    {
+      $status=$this->input->post('status');
+      // ($status==1) ? 'ACTIVE':
+       $this->Part_model->update_part($id,[
+                'status' => $status
+            ]);
+      // echo $status;exit;  
+    }   
 
     /*
      * Editing a part

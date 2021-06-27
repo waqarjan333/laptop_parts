@@ -75,11 +75,12 @@ class Series extends Admin_Controller
             foreach ($posts as $post) {
 
                 $nestedData['id'] = $post->id;
-                $nestedData['name'] = $post->name;
-                $nestedData['brand_name'] = $post->brand_name;
+                $nestedData['name'] =$post->name;
+                $nestedData['brand_name'] =$post->brand_name;
+                // $nestedData['brand_name'] ="<span  code=".$post->id."'>".$post->brand_name."</span>";
                 $nestedData['date_created'] = date('j M Y', strtotime($post->date_created));
                 $nestedData['status'] = ($post->status == 1) ? "<button class='btn btn-success btn-xs btn-status' name='status-active'  code='".$post->id."'>Active</button>" : "<button class='btn btn-danger btn-xs btn-status' name='status-suspend' code='".$post->id."'>Suspened</button>";
-                $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
+                $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit' brandcode='".$post->brand_id."' code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
 
                 $data[] = $nestedData;
             }
@@ -128,6 +129,25 @@ class Series extends Admin_Controller
             }
         } else
             show_error('The series you are trying to edit does not exist.');
+    }
+
+        public function update_series($id)
+    {
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('name', 'Series Name', 'required');
+        
+        if ($this->form_validation->run()) {
+            $this->Series_model->update_series($id,[
+                'name' => $this->input->post('name'),
+                'brand_id' => $this->input->post('brand_id')
+            ]);
+            echo "1";
+        } else {
+            http_response_code(400);
+            echo json_encode($this->form_validation->error_string(" "," "));
+        }
+        
+        
     }
 
  /*

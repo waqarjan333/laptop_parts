@@ -115,6 +115,7 @@
 							<th>Qty</th>
 							<th>Unit Price</th>
 							<th>Description</th>
+							<th>Status</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -189,6 +190,8 @@
 				},
 				{
 					"data": "description"
+				},{
+					"data": "status"
 				},
 				{
 					"data": "actions"
@@ -196,5 +199,71 @@
 			]
 
 		});
+		$(document).on('click', ".btn-delete", function() {
+        $part_id = $(this).attr('code');
+        $action= $(this).attr('name');
+        $url='<?= base_url('part/remove/') ?>' + $part_id;
+     	action($part_id,$action,$url,$status=0)
+
+    });
+$(document).on('click', ".btn-status", function() {
+        $part_id = $(this).attr('code');
+        $action= $(this).attr('name');
+
+        $status=($action=='status-active') ? '2' : '1';
+        
+        $url='<?= base_url('part/updateStatus/') ?>' + $part_id;
+     	action($part_id,$action,$url,$status)
+
+    });
+	function action(part_id,action,url,status)
+	{
+		if(action=='delete')
+		{
+			$text1='This Part will be deleted';
+			$text2='Yes ! Delete.';
+			$text3='Delete Successfully.';
+		}
+		else if(action=='status-active')
+		{
+			$text1='This Part will be Suspended';
+			$text2='Yes ! Suspended.';
+			$text3='Suspended Successfully.';
+		}
+		else{
+			$text1='This Part will be Active';
+			$text2='Yes ! Active.';
+			$text3='Active Successfully.';
+		}
+		// alert(url)
+	   Swal.fire({
+            title: 'are you sure ?',
+            text:$text1,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: $text2,
+            cancelButtonText: 'No! Cancel',
+            confirmButtonClass: 'btn btn-success mt-2',
+            cancelButtonClass: 'btn btn-danger ml-2 mt-2',
+            buttonsStyling: false
+        }).then(function(action) {
+            if (action.isConfirmed) {
+                $.ajax({
+                    url:url ,
+                    method:'POST',
+                    data:{status:status},
+                    success: function(result) {},
+                    complete: function(result) {
+                        $('#mydt').DataTable().ajax.reload();
+                        Swal.fire({
+                            title: 'Success!',
+                            text: $text3,
+                            icon: 'success'
+                        });
+                    }
+                });
+            }
+        });	
+	}
 	});
 </script>

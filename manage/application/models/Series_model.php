@@ -36,7 +36,7 @@ class Series_model extends CI_Model
      */
     function get_all_series($limit, $start, $col, $dir)
     {
-        $this->db->select('series.*, brand.name as brand_name');
+        $this->db->select('series.*, brand.name as brand_name,brand.id as brand_id');
         $this->db->join('brand','brand.id = series.brand_id','left outer');
         $query = $this
             ->db

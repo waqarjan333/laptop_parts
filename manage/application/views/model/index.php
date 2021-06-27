@@ -10,7 +10,7 @@
 				<div class="form-group">
 					<label for="brand_id" class=" control-label">Brand</label>
 					<div class="">
-						<select onchange="get_series()" id="brand_id" name="brand_id" class="form-control select2">
+						<select  id="brand_id" name="brand_id" class="form-control select2">
 							<option value="">Select Brand</option>
 							<?php
 							foreach ($brands as $brand) {
@@ -69,21 +69,85 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Edit Model -->
+		<div id="myModal"  class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" style="float: right;
+    margin-left: -22px;">&times;</button>
+          <h4 class="modal-title">Edit Model</h4>
+        </div>
+        <div class="modal-body">
+         	<div class="form-group">
+					
+					<div class="row">
+						
+						<div class="col-md-12">
+							<label for="brand_id" class=" control-label"></span>Select Brand</label>
+							<select name="brand_id"  id="editBrands" class="form-control select2" data-code="editSelect">
+						
+						</select></div>
+					</div>
+
+						<div class="row">
+						
+						<div class="col-md-12">
+							<label for="brand_id" class=" control-label"></span>Select Series</label>
+							<select name="series_id" id="editSeries" class="form-control select2" data-code="editSelect">
+						
+						</select></div>
+					</div>				</div>
+				<div class="form-group">
+					<label for="name" class=" control-label"><span class="text-danger">*</span>Name</label>
+					<div class="">
+						<input type="text" name="edit_name" id="edit_name"  class="form-control"  />
+						<input type="hidden" id="modelID">
+						<input type="hidden" id="seriesID">
+						<input type="hidden" id="brandID">
+						<span class="text-danger"><?php echo form_error('name'); ?></span>
+					</div>
+				</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-info updateRecord">Update</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <!-- Edit Model End Here -->
 </div>
 
 <script>
-	function get_series() {
+	function get_series(id) {
+		// alert()
 		$.ajax({
-			url: "<?= base_url('model/get_series_by_brand/') ?>" + $('#brand_id').val(),
+			url: "<?= base_url('model/get_series_by_brand/') ?>" + id,
 			type: "POST",
 			beforeSend: function() {
 				 
 			},
 			success: function(response) { 
 				$('#series_id').html(response);
+				$('#editSeries').append(response);
 			}
 		});
 	}
+	$(document).on('change','#brand_id',function(){
+		var id=$(this).val();
+		// alert(id)
+		get_series(id);
+	})
+		$(document).on('change','#editBrands',function(){
+		var id=$(this).val();
+		// alert(id)
+		get_series(id);
+	})
 	$(document).ready(function() {
 		$('#mydt').DataTable({
 			"processing": true,
@@ -183,5 +247,69 @@
             }
         });	
 	}
+
+			$(document).on('click', ".btn-edit", function() {
+			$('#editSeries').html('');	
+			 $modelID = $(this).attr('code');
+			 $('#modelID').val($modelID);
+			var editbrandID = $(this).attr('brandcode');
+			
+			// alert(editbrandID)
+
+			var editseriesID = $(this).attr('seriescode');
+			 model = $(this).parents('tr').children('td').eq(1).text().trim();
+			var editseries = $(this).parents('tr').children('td').eq(2).text().trim();
+         var editbrand = $(this).parents('tr').children('td').eq(3).text().trim();
+
+         get_series(editbrandID);
+
+        	$('#previousBrand').val(editbrand);
+        	$('#edit_name').val(model);
+        	if(editbrand!='')
+        	{
+        		var selectedBrand='<option value="'+editbrandID+'" selected="selected"  >'+editbrand+'</option>';
+        	}
+        	if(editseries!='' && editbrand!='')
+        	{
+			        	$('#editSeries').append($('<option>', {
+			    value: editseriesID,
+			    text: editseries
+			}));	
+			        		// var selectedSeries='<option value="'+editseriesID+'" selected="selected"  >'+editseries+'</option>';
+        	}
+        	var output='<option value="">Select Brand</option>'+
+        	'<?php foreach ($brands as $brand) { ?>'+
+        	'<option value="<?php echo $brand['id']?> "  ><?php echo $brand['name']; ?></option>'+
+			'<?php } ?>'+
+			selectedBrand;
+					
+        	$('#editBrands').html(output);
+        	// $('#editSeries').html(output1);
+			$("#myModal").modal();
+    });
+
+		$(document).on('click','.updateRecord',function(){
+			var editModel=$('#edit_name').val();
+			var editSeriesID=$('#editSeries').val();
+			var modelID=$('#modelID').val();
+			// alert(seriesID);
+			  $.ajax({
+                    url:'<?= base_url('model/update_model/') ?>'+ $modelID,
+                    method:'POST',
+                    data:{name:editModel,series_id:editSeriesID},
+                    success: function(result) {
+                    $('#myModal').modal('hide');	
+                      $('#mydt').DataTable().ajax.reload();
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Model Update Successfully',
+                            icon: 'success'
+                        });	
+                    },
+                    complete: function(result) {
+                      
+                    }
+                });
+		})
 	});
 </script>
