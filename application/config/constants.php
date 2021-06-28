@@ -86,7 +86,7 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
 
 define('RECORDS_PER_PAGE', 5);
 
-define('ASSET_URL', "http:".'/'."/localhost/laptop_parts/");
+define('ASSET_URL', "http:".'/'."/localhost:800/laptop_parts/");
 
 define('ADMIN', 1);
 define('USER', 2);

@@ -2,25 +2,25 @@
 	<div class="col-md-4">
 		<div class="card card-primary">
 			<div class="card-header">
-				<h3 class="card-title">Add New Series</h3>
+				<h3 class="card-title">Add New Category</h3>
 			</div>
 			<?php echo form_open(); ?>
 
 			<div class="card-body">
 				<div class="form-group">
-					<label for="brand_id" class=" control-label"><span class="text-danger">*</span>Brand</label>
+					<label for="parent_cat_id" class=" control-label"><span class="text-danger">*</span>Parent Category</label>
 					<div class="">
-						<select name="brand_id" class="form-control select2" data-code="insertSelect">
-							<option value="">Select Brand</option>
+						<select name="parent_cat_id" class="form-control select2" data-code="insertSelect">
+							<option value="">Select Parent Category</option>
 							<?php
-							foreach ($brands as $brand) {
-								$selected = ($brand['id'] == $this->input->post('brand_id')) ? ' selected="selected"' : "";
+							foreach ($categories as $category) {
+								$selected = ($category['id'] == $this->input->post('parent_cat_id')) ? ' selected="selected"' : "";
 
-								echo '<option value="' . $brand['id'] . '" ' . $selected . '>' . $brand['name'] . '</option>';
+								echo '<option value="' . $category['id'] . '" ' . $selected . '>' . $category['name'] . '</option>';
 							}
 							?>
 						</select>
-						<span class="text-danger"><?php echo form_error('brand_id'); ?></span>
+						<span class="text-danger"><?php echo form_error('parent_cat_id'); ?></span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -46,14 +46,14 @@
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" style="float: right;
     margin-left: -22px;">&times;</button>
-          <h4 class="modal-title">Edit Series</h4>
+          <h4 class="modal-title">Edit Category</h4>
         </div>
         <div class="modal-body">
          	<div class="form-group">
 					
 					<div class="row">
 						<div class="col-md-4">
-							<label for="">Selected Brand</label>
+							<label for="">Selected Parent Category</label>
 							<input type="text" class="form-control" readonly="" id="previousBrand">
 						</div>
 						<div class="col-md-8">
@@ -88,16 +88,16 @@
 		<input type="hidden" id="brandsval">
 		<div class="card card-primary">
 			<div class="card-header">
-				<h3 class="card-title">All Series</h3>
+				<h3 class="card-title">All Categories</h3>
 			</div>
 			<div class="card-body">
 				<table class="table table-striped table-bordered" id="mydt">
 					<thead>
 						<tr>
 							<th>ID</th>
-							<th>Name</th>
-							<th>Brand</th>
-							<th>Date Created</th>
+							<th>Category</th>
+							<th>Parent Cat</th>
+							<th>Date</th>
 							<th>Status</th>
 							<th>Actions</th>
 						</tr>
@@ -110,12 +110,12 @@
 
 <script>
 	$(document).ready(function() {
-		getBrand();
+		
 		$('#mydt').DataTable({
 			"processing": true,
 			"serverSide": true,
 			"ajax": {
-				"url": "<?php echo base_url('series/get_list') ?>",
+				"url": "<?php echo base_url('categories/get_list') ?>",
 				"dataType": "json",
 				"type": "POST"
 			},
@@ -123,10 +123,10 @@
 					"data": "id"
 				},
 				{
-					"data": "name"
+					"data": "cat_name"
 				},
 				{
-					"data": "brand_name"
+					"data": "parent_cat_name"
 				},
 				{
 					"data": "date_created"
@@ -140,11 +140,11 @@
 			]
 
 		});
-			$(document).on('click', ".btn-delete", function() {
-        $series = $(this).attr('code');
+		$(document).on('click', ".btn-delete", function() {
+        $categor_id = $(this).attr('code');
         $action= $(this).attr('name');
-        $url='<?= base_url('series/remove/') ?>' + $series;
-     	action($series,$action,$url,$status=0)
+        $url='<?= base_url('categories/remove/') ?>' + $categor_id;
+     	action($categor_id,$action,$url,$status=0)
 
     });
 		$(document).on('click', ".btn-status", function() {
@@ -153,7 +153,7 @@
 
         $status=($action=='status-active') ? '2' : '1';
         
-        $url='<?= base_url('series/updateStatus/') ?>' + $series;
+        $url='<?= base_url('categories/updateStatus/') ?>' + $series;
      	action($series,$action,$url,$status)
 
     });
@@ -161,7 +161,7 @@
 	{
 		if(action=='delete')
 		{
-			$text1='This Series will be deleted';
+			$text1='This Category will be deleted';
 			$text2='Yes ! Delete.';
 			$text3='Delete Successfully.';
 		}
@@ -206,47 +206,8 @@
             }
         });	
 	}
-	function getBrand()
-	{
-	  $.ajax({
-                    url: "<?= base_url('brand/getBrand/') ?>",
-                    method: 'POST',
-                    success: function(result) {
-                    	// console.log(result)
-                    	$('#brandsval').val(result);
-
-                    }
-	});
-	}
-		$(document).on('click', ".btn-edit", function() {
-			 $seriesID = $(this).attr('code');
-			 $('#seriesID').val($seriesID);
-			var editbrandID = $(this).attr('brandcode');
-			 series = $(this).parents('tr').children('td').eq(1).text().trim();
-         var editbrand = $(this).parents('tr').children('td').eq(2).text().trim();
-        	$('#previousBrand').val(editbrand);
-        	$('#edit_name').val(series);
-        	if(editbrand!='')
-        	{
-        		var selectedBrand='<option value="'+editbrandID+'" selected="selected"  >'+editbrand+'</option>';
-        	}
-        	var output='<option value="">Select Brand</option>'+
-        	'<?php foreach ($brands as $brand) { ?>'+
-        	'<option value="<?php echo $brand['id']?> "  ><?php echo $brand['name']; ?></option>'+
-			'<?php } ?>'+
-			selectedBrand;
-        				// '<option value="" selected="selected">'+editbrand+'</option>';	
-        	
-					
-        	$('#editBrands').html(output);
-			$("#myModal").modal();
-    });
-
-		$(document).on('change','.select2',function(){
-			// alert()
-			var selectBrand=$(this).find("option:selected").text();
-			$('#previousBrand').val(selectBrand);
-		})
+	
+		
 
 		$(document).on('click','.updateRecord',function(){
 			var editSeries=$('#edit_name').val();
