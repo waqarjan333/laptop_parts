@@ -227,6 +227,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 								</p>
 							</a>
 							<ul class="nav nav-treeview">
+							<li class="nav-item">
+									<a href="<?= base_url('categories') ?>" class="nav-link <?php if ($this->uri->segment(1) == 'categories') {
+																							echo "active";
+																						} ?>">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Categories</p>
+									</a>
+								</li>
 								<li class="nav-item">
 									<a href="<?= base_url('brands') ?>" class="nav-link <?php if ($this->uri->segment(1) == 'brands') {
 																							echo "active";
