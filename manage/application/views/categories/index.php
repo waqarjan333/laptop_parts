@@ -54,11 +54,11 @@
 					<div class="row">
 						<div class="col-md-4">
 							<label for="">Selected Parent Category</label>
-							<input type="text" class="form-control" readonly="" id="previousBrand">
+							<input type="text" class="form-control" readonly="" id="previousCategory">
 						</div>
 						<div class="col-md-8">
-							<label for="brand_id" class=" control-label"></span>Select New Brand</label>
-							<select name="brand_id" id="editBrands" class="form-control select2" data-code="editSelect">
+							<label for="parent_cat_id" class=" control-label"></span>Parent Category</label>
+							<select name="parent_cat_id" id="editCategory" class="form-control select2" data-code="editSelect">
 						
 						</select></div>
 					</div>
@@ -67,7 +67,7 @@
 					<label for="name" class=" control-label"><span class="text-danger">*</span>Name</label>
 					<div class="">
 						<input type="text" name="edit_name" id="edit_name"  class="form-control"  />
-						<input type="hidden" id="seriesID">
+						<input type="hidden" id="categoryID">
 						<span class="text-danger"><?php echo form_error('name'); ?></span>
 					</div>
 				</div>
@@ -85,7 +85,6 @@
 	</div>
 
 	<div class="col-md-8">
-		<input type="hidden" id="brandsval">
 		<div class="card card-primary">
 			<div class="card-header">
 				<h3 class="card-title">All Categories</h3>
@@ -151,7 +150,7 @@
         $series = $(this).attr('code');
         $action= $(this).attr('name');
 
-        $status=($action=='status-active') ? '2' : '1';
+        $status=($action=='status-active') ? '0' : '1';
         
         $url='<?= base_url('categories/updateStatus/') ?>' + $series;
      	action($series,$action,$url,$status)
@@ -167,12 +166,12 @@
 		}
 		else if(action=='status-active')
 		{
-			$text1='This Series will be Suspended';
+			$text1='This Category will be Suspended';
 			$text2='Yes ! Suspended.';
 			$text3='Suspended Successfully.';
 		}
 		else{
-			$text1='This Series will be Active';
+			$text1='This Category will be Active';
 			$text2='Yes ! Active.';
 			$text3='Active Successfully.';
 		}
@@ -207,7 +206,35 @@
         });	
 	}
 	
-		
+		$(document).on('click', ".btn-edit", function() {
+			 $categoryID = $(this).attr('code');
+			 $('#categoryID').val($categoryID);
+			var editcatID = $(this).attr('brandcode');
+			 series = $(this).parents('tr').children('td').eq(1).text().trim();
+         var editbrand = $(this).parents('tr').children('td').eq(2).text().trim();
+        	$('#previousBrand').val(editbrand);
+        	$('#edit_name').val(series);
+        	if(editbrand!='')
+        	{
+        		var selectedBrand='<option value="'+editcatID+'" selected="selected"  >'+editbrand+'</option>';
+        	}
+        	var output='<option value="">Select Brand</option>'+
+        	'<?php foreach ($categories as $category) { ?>'+
+        	'<option value="<?php echo $category['id']?> "  ><?php echo $category['name']; ?></option>'+
+			'<?php } ?>'+
+			selectedBrand;
+        				// '<option value="" selected="selected">'+editbrand+'</option>';	
+        	
+					
+        	$('#editBrands').html(output);
+			$("#myModal").modal();
+    });
+
+	$(document).on('change','.select2',function(){
+			// alert()
+			var selectBrand=$(this).find("option:selected").text();
+			$('#previousBrand').val(selectBrand);
+	})	
 
 		$(document).on('click','.updateRecord',function(){
 			var editSeries=$('#edit_name').val();

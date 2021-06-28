@@ -70,7 +70,7 @@ class Categories_model extends CI_Model
     /*
      * function to update categories
      */
-    function update_categories($id, $params)
+    function update_category($id, $params)
     {
         $this->db->where('id', $id);
         return $this->db->update('categories', $params);
@@ -79,7 +79,7 @@ class Categories_model extends CI_Model
     /*
      * function to delete categories
      */
-    function delete_categories($id)
+    function delete_category($id)
     {
         return $this->db->delete('categories', array('id' => $id));
     }

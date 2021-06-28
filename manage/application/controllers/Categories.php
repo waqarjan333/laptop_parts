@@ -138,49 +138,32 @@ class Categories extends Admin_Controller
             show_error('The series you are trying to edit does not exist.');
     }
 
-        public function update_series($id)
-    {
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('name', 'Series Name', 'required');
-        
-        if ($this->form_validation->run()) {
-            $this->Categories_model->update_series($id,[
-                'name' => $this->input->post('name'),
-                'brand_id' => $this->input->post('brand_id')
-            ]);
-            echo "1";
-        } else {
-            http_response_code(400);
-            echo json_encode($this->form_validation->error_string(" "," "));
-        }
-        
-        
-    }
+       
 
  /*
-     * Update Status series
+     * Update Status category
      */
       function updateStatus($id)
     {
       $status=$this->input->post('status');
       // ($status==1) ? 'ACTIVE':
-       $this->Categories_model->update_series($id,[
+       $this->Categories_model->update_category($id,[
                 'status' => $status
             ]);
       // echo $status;exit;  
     }   
     /*
-     * Deleting series
+     * Deleting category
      */
     function remove($id)
     {
-        $series = $this->Categories_model->get_series($id);
+        $category = $this->Categories_model->get_parent_cat_name($id);
 
-        // check if the series exists before trying to delete it
-        if (isset($series['id'])) {
-            $this->Categories_model->delete_series($id);
-            redirect('series/index');
+        // check if the category exists before trying to delete it
+        if (isset($category['id'])) {
+            $this->Categories_model->delete_category($id);
+            redirect('category/index');
         } else
-            show_error('The series you are trying to delete does not exist.');
+            show_error('The category you are trying to delete does not exist.');
     }
 }
