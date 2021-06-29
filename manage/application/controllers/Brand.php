@@ -78,14 +78,15 @@ class Brand extends Admin_Controller
         $data = array();
         if (!empty($posts)) {
             foreach ($posts as $post) {
-                $parentCatName = $this->Categories_model->get_parent_cat_name($post->category_id);
-                $subCatName = $this->Categories_model->get_parent_cat_name($post->sub_category_id);
+
+                // $parentCatName = $this->Categories_model->get_parent_cat_name($post->category_id);
+                // $subCatName = $this->Categories_model->get_sub_cat_name($post->category_id);
                 $nestedData['id'] = $post->id;
                 $nestedData['name'] = $post->name;
-                $nestedData['category'] = $parentCatName['name'];
-                $nestedData['sub_category'] = $subCatName['name'];
+                $nestedData['category'] = $post->categoryName;
+                $nestedData['sub_category'] = $post->subCatName;
                 $nestedData['status'] = ($post->status == 1) ? "<button class='btn btn-success btn-xs btn-status' name='status-active'  code='".$post->id."'>Active</button>" : "<button class='btn btn-danger btn-xs btn-status' name='status-suspend' code='".$post->id."'>Suspened</button>";
-                $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit'  code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
+                $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit' sub_categoryID='".$post->subCatID."' categoryID='".$post->categoryID."' code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
                 //$nestedData['actions'] = "<button class='btn btn-warning btn-xs'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs'>Delete</button>";
 
                 $data[] = $nestedData;
@@ -140,6 +141,16 @@ class Brand extends Admin_Controller
         
     }
 
+      function get_SubcategoriesByCat($categoryID)
+    {
+        $data = $this->db->get_where('categories', array('parent_id' => $categoryID))->result_array();
+        echo "<option value='' disabled=''>Select Sub Category</option>";
+
+        foreach ($data as $key => $value) {
+            echo "<option value='".$value['id']."'>".$value['name']."</option>";
+        }
+    }
+
     function getBrand()
     {
       $this->Brand_model->getBrand();   
@@ -168,5 +179,17 @@ class Brand extends Admin_Controller
             echo "<option value='".$value['id']."'>".$value['name']."</option>";
         }
     }
+
+      function update_brandModel($id)
+    {
+      $status=$this->input->post('status');
+      // ($status==1) ? 'ACTIVE':
+       $this->Brand_model->update_brand($id,[
+                'category_id' => $this->input->post('category_id'),
+                'sub_category_id' => $this->input->post('sub_category_id'),
+                    'name' => $this->input->post('name')
+            ]);
+      // echo $status;exit;  
+    }   
     
 }

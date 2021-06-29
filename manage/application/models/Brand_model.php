@@ -53,6 +53,10 @@ class Brand_model extends CI_Model
      */
     function get_all_brand($limit, $start, $col, $dir)
     {
+           $this->db->select('brand.*,category.name AS categoryName, category.id as categoryID,sub_category.name as subCatName, sub_category.id as subCatID');
+        $this->db->join('categories as category', 'category.id = brand.category_id', 'inner join');
+        $this->db->join('categories as sub_category', 'sub_category.id = brand.sub_category_id', 'inner join');
+         // return $query->row_array();
         $query = $this
             ->db
             ->limit($limit, $start)

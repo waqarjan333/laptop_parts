@@ -27,7 +27,7 @@
 				<div class="form-group">
 					<label for="sub_cat_id" class=" control-label"><span class="text-danger">*</span>Sub Category</label>
 					<div class="">
-						<select name="sub_cat_id" id="sub_cat_id" class="form-control select2" data-code="insertSubSelect">
+						<select name="sub_cat_id" id="sub_cat_id" class="form-control category select2" data-code="insertSubSelect">
 							
 							
 						</select>
@@ -49,7 +49,55 @@
 			<?php echo form_close(); ?>
 		</div>
 	</div>
+		<div id="myModal"  class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+	   <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" style="float: right;
+    margin-left: -22px;">&times;</button>
+          <h4 class="modal-title">Edit Category</h4>
+        </div>
+        <div class="modal-body">
+         	<div class="form-group">
+					
+					<div class="row">
+						
+						<div class="col-md-12">
+							<label for="brand_id" class=" control-label"></span>Select Category</label>
+							<select name="brand_id"  id="editCategory" class="form-control select2" data-code="editSelect">
+						
+						</select></div>
+					</div>
 
+						<div class="row">
+						
+						<div class="col-md-12">
+							<label for="brand_id" class=" control-label"></span>Select Sub Category</label>
+							<select name="series_id" id="editsubCategory" class="form-control select2" data-code="editSelect">
+						
+						</select></div>
+					</div>				</div>
+				<div class="form-group">
+					<label for="name" class=" control-label"><span class="text-danger">*</span>Name</label>
+					<div class="">
+						<input type="text" name="edit_name" id="edit_name"  class="form-control"  />
+						<input type="hidden" id="brandID">
+						<input type="hidden" id="categoryID">
+						<input type="hidden" id="subCategoryID">
+						<span class="text-danger"><?php echo form_error('name'); ?></span>
+					</div>
+				</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-info updateRecord">Update</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <!-- Edit Model End Here -->
 	<div class="col-md-8">
 		<div class="card card-primary">
 			<div class="card-header">
@@ -104,6 +152,98 @@
 			]
 
 		});
+				function get_Subcategories(id) {
+		// alert()
+		$.ajax({
+			url: "<?= base_url('brand/get_SubcategoriesByCat/') ?>" + id,
+			type: "POST",
+			beforeSend: function() {
+				 
+			},
+			success: function(response) { 
+				$('#series_id').html(response);
+				$('#editsubCategory').append(response);
+			}
+		});
+	}
+
+			$(document).on('change','#editCategory',function(){
+				$('#editsubCategory').html('');	
+		var id=$(this).val();
+		// alert(id)
+		get_Subcategories(id);
+	})
+
+				$(document).on('click', ".btn-edit", function() {
+			$('#editsubCategory').html('');	
+			 $brandID = $(this).attr('code');
+			 	var categoryID = $(this).attr('categoryID');
+			var sub_categoryID = $(this).attr('sub_categoryID');
+			 $('#brandID').val($brandID);
+			 $('#subCategoryID').val(sub_categoryID);
+			 $('#categoryID').val(categoryID);
+		
+			// alert(sub_categoryID)
+
+			
+			 brand = $(this).parents('tr').children('td').eq(1).text().trim();
+			var editCategory = $(this).parents('tr').children('td').eq(2).text().trim();
+         var editChildCategory = $(this).parents('tr').children('td').eq(3).text().trim();
+          get_Subcategories(categoryID);
+          // $('#previousBrand').val(editbrand);
+        	$('#edit_name').val(brand);
+
+        	$("#myModal").modal();
+
+				   
+        	if(editCategory!='')
+        	{
+        		var selectedCategory='<option value="'+categoryID+'" selected="selected"  >'+editCategory+'</option>';
+        	}
+
+        	if(editCategory!='' && editChildCategory!='')
+        	{
+        		var selectedSubCategory='<option value="'+sub_categoryID+'" selected="selected"  >'+editChildCategory+'</option>';
+        	}
+
+        	var output='<option value="">Select Category</option>'+
+        	'<?php foreach ($categories as $category) { ?>'+
+        	'<option value="<?php echo $category['id']?> "  ><?php echo $category['name']; ?></option>'+
+			'<?php } ?>'+
+			selectedCategory;
+
+			
+        	$('#editCategory').html(output);
+        	
+        	$('#editsubCategory').append(selectedSubCategory);
+
+    });
+    
+    	$(document).on('click','.updateRecord',function(){
+			var editBrand=$('#edit_name').val();
+			var categoryID=$('#editCategory').val();
+			var subcategoryID=$('#editsubCategory').val();
+			var brandID=$('#brandID').val();
+			// alert(seriesID);
+			  $.ajax({
+                    url:'<?= base_url('brand/update_brandModel/') ?>'+ $brandID,
+                    method:'POST',
+                    data:{name:editBrand,category_id:categoryID,sub_category_id:subcategoryID},
+                    success: function(result) {
+                    $('#myModal').modal('hide');	
+                      $('#mydt').DataTable().ajax.reload();
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Brand Update Successfully',
+                            icon: 'success'
+                        });	
+                    },
+                    complete: function(result) {
+                      
+                    }
+                });
+		});
+
 	});
 
 	$(document).on('click', ".btn-delete", function() {
@@ -172,44 +312,6 @@ $(document).on('click', ".btn-status", function() {
             }
         });	
 	}
-	$(document).on('click', ".btn-edit", function() {
-        $brand_id = $(this).attr('code');
-        // $obj = $(this);
-        brand = $(this).parents('tr').children('td').eq(1).text().trim();
-		
-
-        Swal.fire({
-            title: 'Update Brand',
-            html: '<input id="swal-input1" class="swal2-input" value="' + brand + '">',
-            confirmButtonText: 'Update',
-            focusConfirm: false,
-            preConfirm: () => {
-                return [
-                    document.getElementById('swal-input1').value
-                ]
-            }
-        }).then(function(result) {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "<?= base_url('brand/update_brand/') ?>" + $brand_id,
-                    method: 'POST',
-                    data: {
-                        name: result.value[0]
-                    },
-                    success: function(result) {},
-                    complete: function(result) {
-                        $('#mydt').DataTable().ajax.reload();
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'updated successfuly',
-                            icon: 'success'
-                        });
-                    }
-                });
-            }
-        });
-
-    });
 
 	function get_sub_categories(id) {
 		// alert()
@@ -227,4 +329,6 @@ $(document).on('click', ".btn-status", function() {
 	$(document).on('change','#parent_cat_id',function(){
 		get_sub_categories($(this).val());
 	})
+
+
 </script>
