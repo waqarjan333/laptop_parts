@@ -52,11 +52,13 @@
          	<div class="form-group">
 					
 					<div class="row">
-						<div class="col-md-4">
+						<div class="col-md-12">
 							<label for="">Selected Parent Category</label>
 							<input type="text" class="form-control" readonly="" id="previousCategory">
 						</div>
-						<div class="col-md-8">
+						</div>
+						<div class="row">
+						<div class="col-md-12">
 							<label for="parent_cat_id" class=" control-label"></span>Parent Category</label>
 							<select name="parent_cat_id" id="editCategory" class="form-control select2" data-code="editSelect">
 						
@@ -147,16 +149,16 @@
 
     });
 		$(document).on('click', ".btn-status", function() {
-        $series = $(this).attr('code');
+        $category = $(this).attr('code');
         $action= $(this).attr('name');
 
         $status=($action=='status-active') ? '0' : '1';
         
-        $url='<?= base_url('categories/updateStatus/') ?>' + $series;
-     	action($series,$action,$url,$status)
+        $url='<?= base_url('categories/updateStatus/') ?>' + $category;
+     	action($category,$action,$url,$status)
 
     });
-	function action(series,action,url,status)
+	function action(category,action,url,status)
 	{
 		if(action=='delete')
 		{
@@ -207,18 +209,17 @@
 	}
 	
 		$(document).on('click', ".btn-edit", function() {
-			 $categoryID = $(this).attr('code');
-			 $('#categoryID').val($categoryID);
-			var editcatID = $(this).attr('brandcode');
-			 series = $(this).parents('tr').children('td').eq(1).text().trim();
-         var editbrand = $(this).parents('tr').children('td').eq(2).text().trim();
-        	$('#previousBrand').val(editbrand);
-        	$('#edit_name').val(series);
-        	if(editbrand!='')
+			 $('#categoryID').val($(this).attr('code'));
+			var parentCatId = $(this).attr('parentCatId');
+			var category = $(this).parents('tr').children('td').eq(1).text().trim();
+         	var parentCat = $(this).parents('tr').children('td').eq(2).text().trim();
+        	$('#previousCategory').val(parentCat);
+        	$('#edit_name').val(category);
+        	if(parentCat!='')
         	{
-        		var selectedBrand='<option value="'+editcatID+'" selected="selected"  >'+editbrand+'</option>';
+        		var selectedBrand='<option value="'+parentCatId+'" selected="selected"  >'+parentCat+'</option>';
         	}
-        	var output='<option value="">Select Brand</option>'+
+        	var output='<option value="">Select Category</option>'+
         	'<?php foreach ($categories as $category) { ?>'+
         	'<option value="<?php echo $category['id']?> "  ><?php echo $category['name']; ?></option>'+
 			'<?php } ?>'+
@@ -226,31 +227,31 @@
         				// '<option value="" selected="selected">'+editbrand+'</option>';	
         	
 					
-        	$('#editBrands').html(output);
+        	$('#editCategory').html(output);
 			$("#myModal").modal();
     });
 
 	$(document).on('change','.select2',function(){
 			// alert()
 			var selectBrand=$(this).find("option:selected").text();
-			$('#previousBrand').val(selectBrand);
+			$('#previousCategory').val(selectBrand);
 	})	
 
 		$(document).on('click','.updateRecord',function(){
-			var editSeries=$('#edit_name').val();
-			var editBrand=$('#editBrands').val();
-			var seriesID=$('#seriesID').val();
-			// alert(seriesID);
+			var editCategory=$('#edit_name').val();
+			var parentCatID=$('#editCategory').val();
+			var categoryID=$('#categoryID').val();
+			// alert(categoryID);
 			  $.ajax({
-                    url:'<?= base_url('series/update_series/') ?>'+ $seriesID,
+                    url:'<?= base_url('categories/update_categories/') ?>'+ categoryID,
                     method:'POST',
-                    data:{name:editSeries,brand_id:editBrand},
+                    data:{name:editCategory,parent_id:parentCatID},
                     success: function(result) {
                     $('#myModal').modal('hide');	
                       $('#mydt').DataTable().ajax.reload();
                         Swal.fire({
                             title: 'Success!',
-                            text: 'Series Update Successfully',
+                            text: 'Category Update Successfully',
                             icon: 'success'
                         });	
                     },

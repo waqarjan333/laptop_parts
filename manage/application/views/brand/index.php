@@ -7,6 +7,34 @@
 			<?php echo form_open(); ?>
 
 			<div class="card-body">
+			<div class="form-group">
+					<label for="parent_cat_id" class=" control-label"><span class="text-danger">*</span>Parent Category</label>
+					<div class="">
+						<select name="parent_cat_id" id="parent_cat_id" class="form-control select2" data-code="insertSelect">
+							<option value="">Select Parent Category</option>
+							<?php
+							foreach ($categories as $category) {
+								$selected = ($category['id'] == $this->input->post('parent_cat_id')) ? ' selected="selected"' : "";
+
+								echo '<option value="' . $category['id'] . '" ' . $selected . '>' . $category['name'] . '</option>';
+							}
+							?>
+						</select>
+						<span class="text-danger"><?php echo form_error('parent_cat_id'); ?></span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="sub_cat_id" class=" control-label"><span class="text-danger">*</span>Sub Category</label>
+					<div class="">
+						<select name="sub_cat_id" id="sub_cat_id" class="form-control select2" data-code="insertSubSelect">
+							
+							
+						</select>
+						<span class="text-danger"><?php echo form_error('sub_cat_id'); ?></span>
+					</div>
+				</div>
+
 				<div class="form-group">
 					<label for="name" class=" control-label"><span class="text-danger">*</span>Name</label>
 					<div class="">
@@ -33,7 +61,8 @@
 						<tr>
 							<th>ID</th>
 							<th>Name</th>
-							<th>Date Created</th>
+							<th>Category</th>
+							<th>Sub Category</th>
 							<th>Status</th>
 							<th>Actions</th>
 						</tr>
@@ -61,7 +90,10 @@
 					"data": "name"
 				},
 				{
-					"data": "date_created"
+					"data": "category"
+				},
+				{
+					"data": "sub_category"
 				},
 				{
 					"data": "status"
@@ -178,4 +210,21 @@ $(document).on('click', ".btn-status", function() {
         });
 
     });
+
+	function get_sub_categories(id) {
+		// alert()
+		$.ajax({
+			url: "<?= base_url('brand/get_sub_categories/') ?>" + id,
+			type: "POST",
+			beforeSend: function() {
+				 
+			},
+			success: function(response) { 
+				$('#sub_cat_id').html(response);
+			}
+		});
+	}
+	$(document).on('change','#parent_cat_id',function(){
+		get_sub_categories($(this).val());
+	})
 </script>

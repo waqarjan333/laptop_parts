@@ -87,7 +87,7 @@ class Categories extends Admin_Controller
                 $nestedData['parent_cat_name'] = $catName;
                 $nestedData['date_created'] = date('j M Y', strtotime($post->created_date));
                 $nestedData['status'] = ($post->status == 1) ? "<button class='btn btn-success btn-xs btn-status' name='status-active'  code='".$post->id."'>Active</button>" : "<button class='btn btn-danger btn-xs btn-status' name='status-suspend' code='".$post->id."'>Suspened</button>";
-                $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit' code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
+                $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit' parentCatId='".$post->parent_id."' code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
 
                 $data[] = $nestedData;
             }
@@ -102,40 +102,24 @@ class Categories extends Admin_Controller
 
         echo json_encode($json_data);
     }
-    /*
-     * Editing a series
-     */
-    function edit($id)
+    
+    public function update_categories($id)
     {
-        // check if the series exists before trying to edit it
-        $data['series'] = $this->Categories_model->get_series($id);
-
-        if (isset($data['series']['id'])) {
-            $this->load->library('form_validation');
-
-            $this->form_validation->set_rules('brand_id', 'Brand Id', 'required');
-            $this->form_validation->set_rules('name', 'Name', 'required');
-
-            if ($this->form_validation->run()) {
-                $params = array(
-                    'status' => $this->input->post('status'),
-                    'brand_id' => $this->input->post('brand_id'),
-                    'name' => $this->input->post('name'),
-                    'created_by' => $this->input->post('created_by'),
-                    'date_created' => $this->input->post('date_created'),
-                );
-
-                $this->Categories_model->update_series($id, $params);
-                redirect('series/index');
-            } else {
-                $this->load->model('Categories_model');
-                $data['all_brand'] = $this->Categories_model->get_all_brand();
-
-                $data['_view'] = 'series/edit';
-                $this->load->view('layouts/main', $data);
-            }
-        } else
-            show_error('The series you are trying to edit does not exist.');
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('name', 'Category Name', 'required');
+        
+        if ($this->form_validation->run()) {
+            $this->Categories_model->update_category($id,[
+                'parent_id' => $this->input->post('parent_id'),
+                'name' => $this->input->post('name'),
+                'created_by' => $this->session->userdata('id')
+            ]);
+        } else {
+            http_response_code(400);
+            echo json_encode($this->form_validation->error_string(" "," "));
+        }
+        
+        
     }
 
        

@@ -10,6 +10,7 @@ class Brand extends Admin_Controller
     {
         parent::__construct();
         $this->load->model('Brand_model');
+        $this->load->model('Categories_model');
     }
 
     /*
@@ -20,17 +21,25 @@ class Brand extends Admin_Controller
         $this->load->library('form_validation');
 
         $this->form_validation->set_rules('name', 'Name', 'required');
+        $this->form_validation->set_rules('parent_cat_id', 'Parent Category', 'required');
+        $this->form_validation->set_rules('sub_cat_id', 'Sub Category', 'required');
 
         if ($this->form_validation->run()) {
             $params = array(
                 'status' => ACTIVE,
                 'name' => $this->input->post('name'),
+                'category_id' => $this->input->post('parent_cat_id'),
+                'sub_category_id' => $this->input->post('sub_cat_id'),
                 'created_by' => $this->session->userdata('id')
             );
 
             $brand_id = $this->Brand_model->add_brand($params);
             redirect('brands');
         } else {
+            $this->db->select('*');
+            $this->db->where('parent_id=','');
+            $this->db->where('parent_id=',0);
+            $data['categories'] = $this->db->get('categories')->result_array();
             $data['_view'] = 'brand/index';
             $this->load->view('layouts/main', $data);
         }
@@ -41,9 +50,10 @@ class Brand extends Admin_Controller
         $columns = array(
             0 => 'id',
             1 => 'name',
-            2 => 'date_created',
-            3 => 'status',
-            4 => 'actions',
+            2 => 'category',
+            3 => 'sub_category',
+            4 => 'status',
+            5 => 'actions',
         );
 
         $limit = $this->input->post('length');
@@ -68,10 +78,12 @@ class Brand extends Admin_Controller
         $data = array();
         if (!empty($posts)) {
             foreach ($posts as $post) {
-
+                $parentCatName = $this->Categories_model->get_parent_cat_name($post->category_id);
+                $subCatName = $this->Categories_model->get_parent_cat_name($post->sub_category_id);
                 $nestedData['id'] = $post->id;
                 $nestedData['name'] = $post->name;
-                $nestedData['date_created'] = date('j M Y', strtotime($post->date_created));
+                $nestedData['category'] = $parentCatName['name'];
+                $nestedData['sub_category'] = $subCatName['name'];
                 $nestedData['status'] = ($post->status == 1) ? "<button class='btn btn-success btn-xs btn-status' name='status-active'  code='".$post->id."'>Active</button>" : "<button class='btn btn-danger btn-xs btn-status' name='status-suspend' code='".$post->id."'>Suspened</button>";
                 $nestedData['actions'] = "<button class='btn btn-warning btn-xs btn-edit'  code='".$post->id."'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs btn-delete' name='delete' code='".$post->id."'>Delete</button>";
                 //$nestedData['actions'] = "<button class='btn btn-warning btn-xs'>Edit</button>&nbsp;<button class='btn btn-danger btn-xs'>Delete</button>";
@@ -145,5 +157,16 @@ class Brand extends Admin_Controller
             redirect('brand/index');
         } else
             show_error('The brand you are trying to delete does not exist.');
+    }
+
+    function get_sub_categories($parent_cat_id)
+    {
+        $data = $this->db->get_where('categories', array('parent_id' => $parent_cat_id))->result_array();
+        echo "<option value='' disabled=''>Select Sub Category</option>";
+
+        foreach ($data as $key => $value) {
+            echo "<option value='".$value['id']."'>".$value['name']."</option>";
         }
+    }
+    
 }
